@@ -1,10 +1,12 @@
 import 'dart:developer';
 
+import 'package:authdemo/core/cubit/auth_flow_cubit.dart';
 import 'package:authdemo/router/app.route.dart';
 import 'package:auto_route/annotations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -13,8 +15,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   final appRouter = AppRouter();
-  runApp(MaterialApp.router(
-    routerConfig: appRouter.config(),
+  runApp(BlocProvider(
+    create: (context) => AuthFlowCubit(),
+    child: MaterialApp.router(
+      routerConfig: appRouter.config(),
+    ),
   ));
 }
 
