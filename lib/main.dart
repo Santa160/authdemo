@@ -39,8 +39,11 @@ class _LoginScreenState extends State<LoginScreen> {
             textAlign: TextAlign.center,
           ),
           FormWidget(
-            onSaved: (value) {
-              log(value);
+            onSaved: (value) async {
+              FirebaseAuth auth = FirebaseAuth.instance;
+              await auth
+                  .signInWithCredential(value)
+                  .then((value) => log(value.toString()));
             },
           ),
         ],
@@ -57,7 +60,7 @@ class FormWidget extends StatefulWidget {
     required this.onSaved,
   });
 
-  final ValueChanged<String> onSaved;
+  final ValueChanged<PhoneAuthCredential> onSaved;
 
   @override
   State<FormWidget> createState() => _FormWidgetState();
@@ -70,6 +73,7 @@ class _FormWidgetState extends State<FormWidget> {
   final _formkeyNumber = GlobalKey<FormState>();
   final _formkeyOtp = GlobalKey<FormState>();
   bool isOtpSent = false;
+  String vId = '';
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -98,8 +102,6 @@ class _FormWidgetState extends State<FormWidget> {
                       child: ElevatedButton(
                           onPressed: () async {
                             if (_formkeyNumber.currentState!.validate()) {
-                              widget.onSaved(number.text);
-
                               await FirebaseAuth.instance.verifyPhoneNumber(
                                 phoneNumber: "+91${number.text}",
                                 verificationCompleted:
@@ -110,6 +112,7 @@ class _FormWidgetState extends State<FormWidget> {
                                     (String verificationId, int? resendToken) {
                                   log("otp is sent");
                                   isOtpSent = true;
+                                  vId = verificationId;
                                   setState(() {});
                                 },
                                 codeAutoRetrievalTimeout:
@@ -144,7 +147,10 @@ class _FormWidgetState extends State<FormWidget> {
                       child: ElevatedButton(
                           onPressed: () {
                             if (_formkeyOtp.currentState!.validate()) {
-                              widget.onSaved(otp.text);
+                              PhoneAuthCredential credential =
+                                  PhoneAuthProvider.credential(
+                                      verificationId: vId, smsCode: otp.text);
+                              widget.onSaved(credential);
                               setState(() {});
                             }
                           },
