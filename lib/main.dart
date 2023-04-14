@@ -143,8 +143,10 @@ class _FormWidgetState extends State<FormWidget> {
                       width: double.infinity,
                       child: ElevatedButton(
                           onPressed: () {
-                            widget.onSaved(otp.text);
-                            setState(() {});
+                            if (_formkeyOtp.currentState!.validate()) {
+                              widget.onSaved(otp.text);
+                              setState(() {});
+                            }
                           },
                           child: const Text("Verify otp")))
                 ],
